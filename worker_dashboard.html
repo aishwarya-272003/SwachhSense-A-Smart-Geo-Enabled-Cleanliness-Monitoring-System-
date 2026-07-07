@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Worker Dashboard – Swachh Bharat</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;}
+
+    .lang-bar{background:#145a32;display:flex;justify-content:flex-end;align-items:center;padding:6px 24px;gap:6px;}
+    .lang-btn{padding:4px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:transparent;color:white;cursor:pointer;font-size:.8rem;transition:all .2s;}
+    .lang-btn:hover,.lang-btn.active{background:white;color:#1a6e3e;border-color:white;}
+
+    .topbar{background:linear-gradient(135deg,#1a6e3e,#27ae60);color:white;padding:15px 28px;display:flex;justify-content:space-between;align-items:center;}
+    .topbar h1{font-size:1.25rem;}
+    .btn-logout{padding:7px 16px;background:rgba(255,255,255,.18);color:white;border:1px solid rgba(255,255,255,.5);border-radius:6px;cursor:pointer;font-size:.83rem;text-decoration:none;}
+    .btn-logout:hover{background:rgba(255,255,255,.3);}
+
+    .wrap{max-width:940px;margin:28px auto;padding:0 20px;}
+
+    .flash-ok {padding:12px 16px;background:#d4edda;color:#155724;border-radius:8px;margin-bottom:16px;border-left:4px solid #28a745;font-size:.9rem;line-height:1.55;}
+    .flash-err{padding:12px 16px;background:#f8d7da;color:#721c24;border-radius:8px;margin-bottom:16px;border-left:4px solid #dc3545;font-size:.9rem;line-height:1.55;}
+
+    .info-bar{background:white;border-radius:12px;padding:18px 22px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-left:4px solid #1a6e3e;}
+    .info-bar h2{color:#1a6e3e;font-size:1.1rem;}
+    .pills{display:flex;gap:10px;flex-wrap:wrap;}
+    .pill{background:#f0fff4;border:1px solid #b2dfdb;border-radius:20px;padding:5px 14px;font-size:.8rem;color:#1a6e3e;font-weight:700;}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    .sc{background:white;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07);}
+    .sc .n{font-size:1.9rem;font-weight:700;}
+    .sc .l{font-size:.75rem;color:#999;margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+    .sc.tot .n{color:#334155;} .sc.pen .n{color:#d97706;}
+    .sc.pro .n{color:#1d4ed8;} .sc.res .n{color:#16a34a;}
+
+    .sec{font-size:1rem;font-weight:700;color:#1a6e3e;margin-bottom:14px;}
+
+    .cc{background:white;border-radius:13px;padding:20px 22px;box-shadow:0 2px 9px rgba(0,0,0,.08);margin-bottom:16px;border-left:5px solid #ddd;}
+    .cc.pen{border-left-color:#f59e0b;} .cc.pro{border-left-color:#3b82f6;} .cc.res{border-left-color:#22c55e;}
+    .cc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+    .cc-title{font-weight:700;color:#1e293b;font-size:.97rem;}
+    .cc-meta{font-size:.78rem;color:#94a3b8;margin-top:3px;}
+    .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.74rem;font-weight:700;}
+    .b-pending{background:#fef3c7;color:#92400e;} .b-progress{background:#dbeafe;color:#1e40af;} .b-resolved{background:#dcfce7;color:#166534;}
+    .cc-body{background:#f8fafc;border-radius:8px;padding:10px 13px;font-size:.88rem;color:#475569;line-height:1.55;margin-bottom:14px;}
+
+    /* ── update form ── */
+    .uf{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px 20px;}
+    .uf-title{font-size:.85rem;font-weight:700;color:#166534;margin-bottom:14px;}
+    .uf-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;}
+    .fg{display:flex;flex-direction:column;gap:5px;}
+    .fg label{font-size:.78rem;font-weight:700;color:#374151;}
+    .fg select,.fg input[type=text]{padding:9px 12px;border:1.5px solid #d1d5db;border-radius:7px;font-size:.86rem;background:white;}
+    .fg select:focus,.fg input:focus{outline:none;border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.1);}
+    .btn-upd{padding:10px 26px;background:linear-gradient(135deg,#1a6e3e,#27ae60);color:white;border:none;border-radius:7px;font-size:.87rem;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:2px;}
+    .btn-upd:hover{opacity:.9;}
+
+    /* ── Geotag upload panel ── */
+    .geo-panel{border:2px solid #bbf7d0;border-radius:11px;background:#f0fdf4;padding:16px 18px;min-width:270px;max-width:340px;}
+
+    .geo-panel-title{font-size:.8rem;font-weight:700;color:#166534;display:flex;align-items:center;gap:7px;margin-bottom:12px;}
+    .geo-panel-title .tag-badge{background:#1a6e3e;color:white;padding:2px 9px;border-radius:10px;font-size:.68rem;letter-spacing:.3px;}
+
+    /* Sample overlay diagram */
+    .geo-sample{border-radius:8px;overflow:hidden;border:1.5px solid #86efac;margin-bottom:12px;font-size:0;}
+    .geo-sample-top{background:#64748b;height:64px;display:flex;align-items:center;justify-content:center;}
+    .geo-sample-top span{font-size:.72rem;color:rgba(255,255,255,.7);}
+    .geo-sample-bottom{display:flex;height:52px;}
+    .geo-sample-map{width:30%;background:linear-gradient(135deg,#4ade80 0%,#16a34a 40%,#92400e 70%,#4ade80 100%);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+    .geo-sample-info{flex:1;background:#1a1a2e;display:flex;flex-direction:column;justify-content:center;padding:5px 8px;gap:3px;}
+    .geo-sample-info .line{height:5px;border-radius:3px;background:rgba(255,255,255,.8);}
+    .geo-sample-info .line.short{width:60%;}
+    .geo-sample-info .line.xshort{width:40%;}
+
+    .geo-instructions{background:white;border-radius:8px;padding:10px 12px;margin-bottom:12px;border:1px solid #d1fae5;}
+    .geo-instructions .step{display:flex;align-items:flex-start;gap:8px;font-size:.76rem;color:#374151;margin-bottom:6px;line-height:1.5;}
+    .geo-instructions .step:last-child{margin-bottom:0;}
+    .geo-instructions .step .num{background:#1a6e3e;color:white;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+
+    .geo-panel input[type=file]{display:none;}
+    .btn-choose{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px 14px;background:linear-gradient(135deg,#1a6e3e,#27ae60);color:white;border:none;border-radius:7px;font-size:.84rem;font-weight:700;cursor:pointer;}
+    .btn-choose:hover{opacity:.9;}
+
+    /* Status chip */
+    .geo-chip{margin-top:9px;display:none;padding:8px 12px;border-radius:8px;font-size:.74rem;font-weight:600;line-height:1.5;}
+    .geo-chip.scanning{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;}
+    .geo-chip.ok      {background:#f0fdf4;color:#15803d;border:1px solid #86efac;}
+    .geo-chip.fail    {background:#fff7ed;color:#92400e;border:1px solid #fed7aa;font-weight:400;}
+
+    /* Thumbnail */
+    .geo-preview{margin-top:10px;display:none;}
+    .geo-preview img{width:100%;max-height:140px;object-fit:cover;border-radius:7px;border:2px solid #bbf7d0;}
+    .geo-preview .fname{font-size:.71rem;color:#4b5563;margin-top:4px;word-break:break-all;}
+
+    /* ── Locked panel ── */
+    .uf-locked{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:16px 18px;display:flex;align-items:flex-start;gap:14px;}
+    .lock-icon{font-size:1.7rem;flex-shrink:0;margin-top:2px;}
+    .lock-body{font-size:.84rem;color:#475569;line-height:1.65;}
+    .lock-body strong{display:block;color:#1e293b;font-size:.9rem;margin-bottom:4px;}
+    .res-ts{font-size:.77rem;color:#15803d;margin-top:9px;}
+
+    .empty{text-align:center;background:white;border-radius:13px;padding:52px 24px;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+    .empty .ei{font-size:3rem;margin-bottom:12px;}
+    .empty p{color:#64748b;}
+
+    @media(max-width:640px){
+      .stats{grid-template-columns:repeat(2,1fr);}
+      .uf-row{flex-direction:column;}
+      .geo-panel{min-width:100%;max-width:100%;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <span style="color:rgba(255,255,255,.7);font-size:.78rem;margin-right:4px;">🌐</span>
+  <button class="lang-btn" data-lang="en" onclick="applyTranslations('en')">English</button>
+  <button class="lang-btn" data-lang="hi" onclick="applyTranslations('hi')">हिंदी</button>
+  <button class="lang-btn" data-lang="kn" onclick="applyTranslations('kn')">ಕನ್ನಡ</button>
+</div>
+
+<div class="topbar">
+  <h1>🌿 <span data-i18n="site_name">Swachh Bharat Mission</span></h1>
+  <a href="{{ url_for('worker.logout') }}" class="btn-logout">Logout</a>
+</div>
+
+<div class="wrap">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat, msg in messages %}
+      <div class="{{ 'flash-ok' if cat == 'success' else 'flash-err' }}">{{ msg }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
+
+  <div class="info-bar">
+    <div>
+      <h2>👷 Worker Dashboard</h2>
+      <p style="color:#64748b;font-size:.85rem;margin-top:3px;">Update and manage complaints assigned to your ward.</p>
+    </div>
+    <div class="pills">
+      <span class="pill">👤 {{ session.get('worker_name','–') }}</span>
+      <span class="pill">🏙️ {{ session.get('worker_city','–')|title }}</span>
+      <span class="pill">📍 Ward {{ session.get('worker_ward','–') }}</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="sc tot"><div class="n">{{ stats.total }}</div><div class="l">Total</div></div>
+    <div class="sc pen"><div class="n">{{ stats.pending }}</div><div class="l">Pending</div></div>
+    <div class="sc pro"><div class="n">{{ stats.in_progress }}</div><div class="l">In Progress</div></div>
+    <div class="sc res"><div class="n">{{ stats.resolved }}</div><div class="l">Resolved</div></div>
+  </div>
+
+  <div class="sec">📋 Complaints in Your Ward</div>
+
+  {% if complaints %}
+    {% for c in complaints %}
+      {% if   c.status == 'Pending'     %}{% set cs = 'pen' %}{% set bc = 'b-pending'  %}
+      {% elif c.status == 'In Progress' %}{% set cs = 'pro' %}{% set bc = 'b-progress' %}
+      {% else                           %}{% set cs = 'res' %}{% set bc = 'b-resolved' %}
+      {% endif %}
+
+      <div class="cc {{ cs }}">
+        <div class="cc-head">
+          <div>
+            <div class="cc-title">Complaint #{{ c.complaint_id }} — {{ c.name }}</div>
+            <div class="cc-meta">
+              📞 {{ c.phone }}&nbsp;&nbsp;|&nbsp;&nbsp;
+              🕐 {{ c.created_at.strftime('%d %b %Y, %I:%M %p') if c.created_at else '–' }}
+            </div>
+          </div>
+          <span class="badge {{ bc }}">{{ c.status }}</span>
+        </div>
+
+        <div class="cc-body">{{ c.complaint }}</div>
+
+        {% if c.status == 'Resolved' %}
+
+          {# ── LOCKED ── #}
+          <div class="uf-locked">
+            <span class="lock-icon">🔒</span>
+            <div class="lock-body">
+              <strong>Status Locked — Cannot Update Again</strong>
+              This complaint is permanently marked as <em>Resolved</em>.
+              Each complaint can only be resolved once — no further changes are allowed.
+            </div>
+          </div>
+          {% if c.resolved_at %}
+            <p class="res-ts">✅ Resolved on {{ c.resolved_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+          {% endif %}
+
+        {% else %}
+
+          {# ── ACTIVE UPDATE FORM ── #}
+          <div class="uf">
+            <div class="uf-title">✏️ Update Status</div>
+            <form method="POST" action="{{ url_for('worker.update_complaint') }}"
+                  enctype="multipart/form-data" id="form_{{ c.complaint_id }}">
+              <input type="hidden" name="complaint_id" value="{{ c.complaint_id }}">
+              <div class="uf-row">
+
+                <div class="fg">
+                  <label>New Status</label>
+                  <select name="status" required>
+                    <option value="Pending"     {{ 'selected' if c.status=='Pending'     }}>⏳ Pending</option>
+                    <option value="In Progress" {{ 'selected' if c.status=='In Progress' }}>🔧 In Progress</option>
+                    <option value="Resolved">✅ Resolved</option>
+                  </select>
+                </div>
+
+                <div class="fg" style="flex:1;min-width:160px;">
+                  <label>Remarks (optional)</label>
+                  <input type="text" name="remarks" placeholder="e.g. Waste cleared from site">
+                </div>
+
+                {# ── Geotag photo upload panel ── #}
+                <div class="geo-panel">
+
+                  <div class="geo-panel-title">
+                    📍 Geotag Proof Photo
+                    <span class="tag-badge">GPS Map Camera</span>
+                  </div>
+
+                  {# Visual diagram showing what a valid geotag photo looks like #}
+                  <div class="geo-sample" title="A valid GPS Map Camera geotag photo looks like this">
+                    <div class="geo-sample-top">
+                      <span>📷 Photo of resolved site</span>
+                    </div>
+                    <div class="geo-sample-bottom">
+                      <div class="geo-sample-map">📍</div>
+                      <div class="geo-sample-info">
+                        <div class="line"></div>
+                        <div class="line short"></div>
+                        <div class="line xshort"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {# Step-by-step instructions #}
+                  <div class="geo-instructions">
+                    <div class="step"><span class="num">1</span><span>Install <strong>GPS Map Camera</strong> app on your phone</span></div>
+                    <div class="step"><span class="num">2</span><span>Open app — it shows your live location on a map</span></div>
+                    <div class="step"><span class="num">3</span><span>Take a photo of the <strong>resolved site</strong></span></div>
+                    <div class="step"><span class="num">4</span><span>The photo will show <strong>map + address + coordinates</strong> at the bottom</span></div>
+                    <div class="step"><span class="num">5</span><span>Upload that geotag photo here</span></div>
+                  </div>
+
+                  {# Hidden file input #}
+                  <input type="file"
+                         name="proof_photo"
+                         accept="image/jpeg,image/jpg,image/png,image/webp"
+                         id="photo_{{ c.complaint_id }}"
+                         onchange="onGeoPhotoSelected(this,'{{ c.complaint_id }}')">
+
+                  <button type="button" class="btn-choose"
+                          onclick="document.getElementById('photo_{{ c.complaint_id }}').click()">
+                    📂 Choose Geotag Photo
+                  </button>
+
+                  <div class="geo-chip" id="chip_{{ c.complaint_id }}"></div>
+
+                  <div class="geo-preview" id="prev_{{ c.complaint_id }}">
+                    <img id="previmg_{{ c.complaint_id }}" src="" alt="Geotag photo preview">
+                    <div class="fname" id="fname_{{ c.complaint_id }}"></div>
+                  </div>
+
+                </div>{# end geo-panel #}
+
+                <div class="fg" style="justify-content:flex-end;align-self:flex-end;">
+                  <button type="submit" class="btn-upd">Update</button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+
+        {% endif %}
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="empty">
+      <div class="ei">🎉</div>
+      <p>No complaints are currently assigned to your ward. Great work!</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+<script>
+initLanguageSwitcher();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CLIENT-SIDE GEOTAG PHOTO DETECTOR
+   Mirrors the 6-factor server-side check. Uses canvas pixel sampling.
+   Gives the worker instant feedback before form submission.
+
+   GPS Map Camera overlay structure (bottom 35% of image):
+   ┌────────────────────────────────────────────────────┐
+   │  🗺 Map thumbnail (left 27%)  │ White text on dark │
+   │  satellite imagery + red pin  │ Address, Lat/Long  │
+   └────────────────────────────────────────────────────┘
+════════════════════════════════════════════════════════════════════════════ */
+function analyseGeotag(imgEl, callback) {
+  var W = 400, H = 300;   // analysis resolution
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(imgEl, 0, 0, W, H);
+
+  var overlayTop = Math.floor(H * 0.65);
+  var mapRight   = Math.floor(W * 0.27);
+
+  function getPixels(x1, y1, x2, y2) {
+    return ctx.getImageData(x1, y1, x2 - x1, y2 - y1).data;
+  }
+
+  function meanBrightness(pixels) {
+    var s = 0, n = pixels.length / 4;
+    for (var i = 0; i < pixels.length; i += 4)
+      s += (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+    return n > 0 ? s / n : 0;
+  }
+
+  function stdDev(pixels) {
+    var vals = [], n = pixels.length / 4;
+    for (var i = 0; i < pixels.length; i += 4)
+      vals.push((pixels[i] + pixels[i+1] + pixels[i+2]) / 3);
+    if (!n) return 0;
+    var m = vals.reduce(function(a,b){return a+b;},0)/n;
+    return Math.sqrt(vals.reduce(function(a,v){return a+(v-m)*(v-m);},0)/n);
+  }
+
+  function darkRatio(pixels) {
+    var dark = 0, n = pixels.length / 4;
+    for (var i = 0; i < pixels.length; i += 4)
+      if ((pixels[i]+pixels[i+1]+pixels[i+2])/3 < 80) dark++;
+    return n > 0 ? dark / n : 0;
+  }
+
+  function whiteRatio(pixels) {
+    var white = 0, n = pixels.length / 4;
+    for (var i = 0; i < pixels.length; i += 4)
+      if (pixels[i]>210 && pixels[i+1]>210 && pixels[i+2]>210) white++;
+    return n > 0 ? white / n : 0;
+  }
+
+  function redPinCount(pixels) {
+    var cnt = 0;
+    for (var i = 0; i < pixels.length; i += 4)
+      if (pixels[i]>155 && pixels[i+1]<95 && pixels[i+2]<95) cnt++;
+    return cnt;
+  }
+
+  var scenePx    = getPixels(0, 0, W, Math.floor(H * 0.60));
+  var overlayPx  = getPixels(0, overlayTop, W, H);
+  var mapPx      = getPixels(0, overlayTop, mapRight, H);
+  var infoPx     = getPixels(mapRight, overlayTop, W, H);
+
+  var sceneBright    = meanBrightness(scenePx);
+  var overlayBright  = meanBrightness(overlayPx);
+  var darknessRatio  = sceneBright > 0 ? overlayBright / sceneBright : 1;
+  var bottomDarkR    = darkRatio(overlayPx);
+  var mapStd         = stdDev(mapPx);
+  var redPin         = redPinCount(mapPx);
+  var whiteR         = whiteRatio(infoPx);
+  var infoDarkR      = darkRatio(infoPx);
+
+  var checks = {
+    darkness:  darknessRatio < 0.95,
+    darkPixels:bottomDarkR   >= 0.20,
+    mapColour: mapStd         >= 28,
+    redPin:    redPin         >= 25,
+    whiteText: whiteR         >= 0.008,
+    infoDark:  infoDarkR      >= 0.15
+  };
+
+  var passed  = Object.values(checks).filter(Boolean).length;
+  var total   = Object.keys(checks).length;
+  var allPass = passed === total;
+
+  callback(allPass, passed, total, checks);
+}
+
+function onGeoPhotoSelected(input, cid) {
+  var chip = document.getElementById('chip_'   + cid);
+  var prev = document.getElementById('prev_'   + cid);
+  var pimg = document.getElementById('previmg_'+ cid);
+  var fnm  = document.getElementById('fname_'  + cid);
+  var file = input.files && input.files[0];
+
+  chip.style.display = 'none';
+  prev.style.display = 'none';
+
+  if (!file) return;
+
+  var url = URL.createObjectURL(file);
+  pimg.src = url;
+  fnm.textContent = file.name + '  (' + (file.size / 1024).toFixed(0) + ' KB)';
+  prev.style.display = 'block';
+
+  chip.className   = 'geo-chip scanning';
+  chip.style.display = 'block';
+  chip.textContent   = '⏳ Analysing geotag overlay…';
+
+  pimg.onload = function() {
+    analyseGeotag(pimg, function(ok, passed, total, checks) {
+      if (ok) {
+        chip.className = 'geo-chip ok';
+        chip.innerHTML =
+          '✅ Valid GPS Map Camera geotag photo — all checks passed';
+      } else {
+        var msgs = [];
+        if (!checks.darkness)   msgs.push('Bottom of photo is not dark enough — no dark overlay panel');
+        if (!checks.darkPixels) msgs.push('Not enough dark pixels in the bottom strip');
+        if (!checks.mapColour)  msgs.push('No Google Maps satellite thumbnail in bottom-left');
+        if (!checks.redPin)     msgs.push('No red location pin visible on the map');
+        if (!checks.whiteText)  msgs.push('No white address/coordinates text visible');
+        if (!checks.infoDark)   msgs.push('Info panel background is not dark enough');
+
+        chip.className = 'geo-chip fail';
+        chip.innerHTML =
+          '<strong>❌ This is NOT a GPS Map Camera geotag photo</strong><br>' +
+          '<span style="font-size:.71rem;">Issues found:</span>' +
+          '<ul style="margin:4px 0 4px 14px;font-size:.71rem;line-height:1.6;">' +
+          msgs.map(function(m){ return '<li>' + m + '</li>'; }).join('') +
+          '</ul>' +
+          '<div style="margin-top:6px;padding:7px 9px;background:rgba(194,65,12,.08);border-radius:5px;font-size:.72rem;line-height:1.55;">' +
+          '<strong>How to fix:</strong> Open the <strong>GPS Map Camera</strong> app on your phone → ' +
+          'Enable Location/GPS → Take the photo of the resolved site → ' +
+          'The app will add a map + address + coordinates at the bottom of the photo → Upload that photo here.' +
+          '</div>';
+      }
+    });
+  };
+}
+</script>
+</body>
+</html>

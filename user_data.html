@@ -1,0 +1,31 @@
+{% extends "staff/base.html" %}
+{% block title %}User Data{% endblock %}
+{% block page_title %}👤 <span data-i18n="nav_user_data">User Data</span>{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span data-i18n="all_submissions">All Complaint Submissions</span>
+    <span style="font-size:0.85rem;color:#666;">{{ complaints | length }} <span data-i18n="records">records</span></span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <table>
+      <thead>
+        <tr><th>#</th><th data-i18n="th_name">Name</th><th data-i18n="th_phone">Phone</th><th data-i18n="th_city">City</th><th data-i18n="th_ward">Ward</th><th data-i18n="th_complaint">Complaint</th><th data-i18n="th_status">Status</th><th data-i18n="th_date">Date</th></tr>
+      </thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td>{{ c.complaint_id }}</td><td>{{ c.name }}</td><td>{{ c.phone }}</td>
+          <td>{{ c.city | title }}</td><td>{{ c.ward_id }}</td>
+          <td>{{ c.complaint[:50] }}{% if c.complaint|length > 50 %}...{% endif %}</td>
+          <td><span class="badge badge-{{ 'resolved' if c.status == 'Resolved' else ('progress' if c.status == 'In Progress' else 'pending') }}">{{ c.status }}</span></td>
+          <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;padding:24px;color:#999;" data-i18n="no_data">No data found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

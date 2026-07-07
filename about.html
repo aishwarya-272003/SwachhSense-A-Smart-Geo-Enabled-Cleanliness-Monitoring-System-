@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About – Swachh Bharat Mission</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+    .lang-bar { background: #145a32; display: flex; justify-content: flex-end; align-items: center; padding: 6px 24px; gap: 6px; }
+    .lang-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.4); background: transparent; color: white; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+    .lang-btn:hover, .lang-btn.active { background: white; color: #1a6e3e; border-color: white; }
+    .nav { background: white; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .nav a { color: #1a6e3e; text-decoration: none; font-weight: 600; }
+    .nav-links { display: flex; gap: 24px; }
+    .header { background: linear-gradient(135deg, #1a6e3e, #27ae60); color: white; padding: 60px 24px; text-align: center; }
+    .header h1 { font-size: 2rem; margin-bottom: 12px; }
+    .header p { opacity: 0.85; max-width: 500px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 40px auto; padding: 0 24px; }
+    .card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+    .card h2 { color: #1a6e3e; margin-bottom: 16px; }
+    .card p { line-height: 1.7; color: #555; margin-bottom: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .feature { text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px; }
+    .feature .icon { font-size: 2rem; margin-bottom: 10px; }
+    .feature h3 { color: #1a6e3e; margin-bottom: 6px; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+<div class="lang-bar">
+  <span style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-right:4px;">🌐</span>
+  <button class="lang-btn" data-lang="en" onclick="applyTranslations('en')">English</button>
+  <button class="lang-btn" data-lang="hi" onclick="applyTranslations('hi')">हिंदी</button>
+  <button class="lang-btn" data-lang="kn" onclick="applyTranslations('kn')">ಕನ್ನಡ</button>
+</div>
+<div class="nav">
+  <a href="{{ url_for('home') }}">🌿 <span data-i18n="site_name">Swachh Bharat</span></a>
+  <div class="nav-links">
+    <a href="{{ url_for('home') }}" data-i18n="home">Home</a>
+    <a href="{{ url_for('about') }}" data-i18n="about">About</a>
+    <a href="{{ url_for('user.user_form') }}" data-i18n="register_complaint">Register Complaint</a>
+  </div>
+</div>
+<div class="header">
+  <h1 data-i18n="about_title">About Swachh Bharat Mission</h1>
+  <p data-i18n="about_subtitle">A digital platform to report and resolve sanitation issues across India</p>
+</div>
+<div class="container">
+  <div class="card">
+    <h2 data-i18n="mission_title">🌿 Our Mission</h2>
+    <p data-i18n="mission_p1">Swachh Bharat Mission is a flagship program of the Government of India aimed at making India clean and open defecation free.</p>
+    <p data-i18n="mission_p2">Our system automatically detects your location and connects you with the right ward office — no matter which city you're in.</p>
+  </div>
+  <div class="card">
+    <h2 data-i18n="features_title">⚡ Key Features</h2>
+    <div class="grid">
+      <div class="feature"><div class="icon">📍</div><h3 data-i18n="feat_auto_title">Auto Location Detection</h3><p style="font-size:0.85rem;color:#666;" data-i18n="feat_auto_desc">Detects your city automatically</p></div>
+      <div class="feature"><div class="icon">🏙️</div><h3 data-i18n="feat_city_title">Multi-City Support</h3><p style="font-size:0.85rem;color:#666;" data-i18n="feat_city_desc">Works for all Karnataka cities</p></div>
+      <div class="feature"><div class="icon">📝</div><h3 data-i18n="feat_easy_title">Easy Reporting</h3><p style="font-size:0.85rem;color:#666;" data-i18n="feat_easy_desc">Simple complaint registration</p></div>
+      <div class="feature"><div class="icon">✅</div><h3 data-i18n="feat_resolve_title">Fast Resolution</h3><p style="font-size:0.85rem;color:#666;" data-i18n="feat_resolve_desc">Track complaint status</p></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="contact_title">📞 Contact</h2>
+    <p data-i18n="contact_p1">For support or queries, please contact your local municipal corporation or the Swachh Bharat helpline.</p>
+    <p><strong data-i18n="contact_helpline">National Helpline:</strong> 1800-11-1000</p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+<script>initLanguageSwitcher();</script>
+</body>
+</html>

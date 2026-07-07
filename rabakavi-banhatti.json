@@ -1,0 +1,17 @@
+[
+  {"ward_id": 1,  "ward_name": "Ward 1",  "area_name": "Ward 1",  "pincode": "587313"},
+  {"ward_id": 2,  "ward_name": "Ward 2",  "area_name": "Ward 2",  "pincode": "587313"},
+  {"ward_id": 3,  "ward_name": "Ward 3",  "area_name": "Ward 3",  "pincode": "587313"},
+  {"ward_id": 4,  "ward_name": "Ward 4",  "area_name": "Ward 4",  "pincode": "587313"},
+  {"ward_id": 5,  "ward_name": "Ward 5",  "area_name": "Ward 5",  "pincode": "587313"},
+  {"ward_id": 6,  "ward_name": "Ward 6",  "area_name": "Ward 6",  "pincode": "587313"},
+  {"ward_id": 7,  "ward_name": "Ward 7",  "area_name": "Ward 7",  "pincode": "587313"},
+  {"ward_id": 8,  "ward_name": "Ward 8",  "area_name": "Ward 8",  "pincode": "587313"},
+  {"ward_id": 9,  "ward_name": "Ward 9",  "area_name": "Ward 9",  "pincode": "587313"},
+  {"ward_id": 10, "ward_name": "Ward 10", "area_name": "Ward 10", "pincode": "587313"},
+  {"ward_id": 11, "ward_name": "Ward 11", "area_name": "Ward 11", "pincode": "587313"},
+  {"ward_id": 12, "ward_name": "Ward 12", "area_name": "Ward 12", "pincode": "587313"},
+  {"ward_id": 13, "ward_name": "Ward 13", "area_name": "Ward 13", "pincode": "587313"},
+  {"ward_id": 14, "ward_name": "Ward 14", "area_name": "Ward 14", "pincode": "587313"},
+  {"ward_id": 15, "ward_name": "Ward 15", "area_name": "Ward 15", "pincode": "587313"}
+]

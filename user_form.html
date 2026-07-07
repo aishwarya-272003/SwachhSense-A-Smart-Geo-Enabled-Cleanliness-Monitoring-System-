@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Swachh Bharat – Register Complaint</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+    .lang-bar { background: #145a32; display: flex; justify-content: flex-end; align-items: center; padding: 6px 24px; gap: 6px; }
+    .lang-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.4); background: transparent; color: white; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+    .lang-btn:hover, .lang-btn.active { background: white; color: #1a6e3e; border-color: white; }
+    .header { background: linear-gradient(135deg, #1a6e3e 0%, #2ecc71 100%); color: white; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    #location-banner { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
+    #location-banner.detected { background: #d4edda; border-color: #28a745; }
+    #location-banner.error { background: #f8d7da; border-color: #dc3545; }
+    #city-display { font-weight: 700; font-size: 1rem; }
+    #change-city-btn { margin-left: auto; padding: 4px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; align-items: center; justify-content: center; flex-direction: column; color: white; gap: 16px; }
+    #loading-overlay.show { display: flex; }
+    .spinner { width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .container { max-width: 680px; margin: 32px auto; padding: 0 16px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); overflow: hidden; }
+    .card-header { background: #1a6e3e; color: white; padding: 18px 24px; font-size: 1.1rem; font-weight: 600; }
+    .card-body { padding: 24px; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #444; }
+    input[type="text"], input[type="tel"], select, textarea { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #1a6e3e; box-shadow: 0 0 0 3px rgba(26,110,62,0.1); }
+    textarea { resize: vertical; min-height: 100px; }
+    .upload-area { border: 2px dashed #c8e6c9; border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f9fffe; position: relative; }
+    .upload-area:hover, .upload-area.dragover { border-color: #1a6e3e; background: #e8f5e9; }
+    .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .upload-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .upload-text { color: #555; font-size: 0.9rem; }
+    .upload-hint { color: #999; font-size: 0.78rem; margin-top: 4px; }
+    #preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .preview-item { position: relative; width: 90px; height: 90px; border-radius: 8px; overflow: hidden; border: 2px solid #c8e6c9; }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(220,53,69,0.85); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .upload-count { font-size: 0.8rem; color: #1a6e3e; margin-top: 6px; font-weight: 600; }
+    .btn-submit { width: 100%; padding: 13px; background: linear-gradient(135deg, #1a6e3e, #27ae60); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    .btn-submit:hover { opacity: 0.9; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 12px; padding: 28px; width: 360px; max-width: 95vw; }
+    .modal h3 { margin-bottom: 16px; color: #1a6e3e; }
+    .modal select { margin-bottom: 16px; }
+    .modal-btns { display: flex; gap: 10px; }
+    .btn-primary { flex: 1; padding: 10px; background: #1a6e3e; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .alert { padding: 10px 16px; border-radius: 6px; margin-bottom: 16px; }
+    .alert-success { background: #d4edda; color: #155724; }
+    .alert-error { background: #f8d7da; color: #721c24; }
+    #ward-loading { display: none; color: #666; font-size: 0.85rem; margin-top: 4px; }
+  </style>
+</head>
+<body>
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div data-i18n="detecting_location">Detecting your location...</div>
+</div>
+<div class="lang-bar">
+  <span style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-right:4px;">🌐</span>
+  <button class="lang-btn" data-lang="en" onclick="applyTranslations('en')">English</button>
+  <button class="lang-btn" data-lang="hi" onclick="applyTranslations('hi')">हिंदी</button>
+  <button class="lang-btn" data-lang="kn" onclick="applyTranslations('kn')">ಕನ್ನಡ</button>
+</div>
+<div class="header">
+  <div>
+    <div style="font-size:1.4rem;font-weight:700;">🌿 <span data-i18n="site_name">Swachh Bharat Mission</span></div>
+    <div style="font-size:0.85rem;opacity:0.85;" data-i18n="form_title">Register Sanitation Complaint</div>
+  </div>
+</div>
+<div id="location-banner">
+  <span style="font-size:1.4rem;">📍</span>
+  <div>
+    <div id="city-display" data-i18n="detecting_location">Detecting your location...</div>
+    <div id="location-sub" style="font-size:0.78rem;opacity:0.8;"></div>
+  </div>
+  <button id="change-city-btn" onclick="openCityModal()" data-i18n="change_city">Change City</button>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container" style="margin-bottom:0;padding-top:16px;">
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ 'success' if cat == 'success' else 'error' }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<div class="container">
+  <div class="card">
+    <div class="card-header" data-i18n="complaint_form_header">📝 Complaint Registration Form</div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('user.user_form') }}" id="complaintForm" enctype="multipart/form-data">
+        <input type="hidden" name="city" id="city-input" value="{{ city }}">
+        <input type="hidden" name="latitude" id="lat-input">
+        <input type="hidden" name="longitude" id="lon-input">
+        <div class="form-group">
+          <label data-i18n="label_name">Full Name *</label>
+          <input type="text" name="name" required data-i18n-placeholder="placeholder_name" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_phone">Phone Number *</label>
+          <input type="tel" name="phone" required placeholder="9XXXXXXXXX" pattern="[0-9]{10,13}">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_ward">Ward *</label>
+          <select name="ward_id" id="ward-select" required>
+            <option value="" data-i18n="select_ward">-- Select Ward --</option>
+            {% for ward in wards %}
+              <option value="{{ ward.ward_id }}">{{ ward.ward_name }}</option>
+            {% endfor %}
+          </select>
+          <div id="ward-loading" data-i18n="loading_wards">⏳ Loading wards...</div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_complaint">Complaint / Issue *</label>
+          <textarea name="complaint" required data-i18n-placeholder="placeholder_complaint" placeholder="Describe the issue (e.g. garbage not collected, open drain, etc.)"></textarea>
+        </div>
+        <div class="form-group">
+          <label><span data-i18n="label_photos">Upload Photos</span> <span style="color:#999;font-weight:400;" data-i18n="photos_optional">(optional, max 5 images)</span></label>
+          <div class="upload-area" id="upload-area">
+            <input type="file" name="images" id="image-input" accept="image/*" multiple onchange="handleFiles(this.files)">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" data-i18n="upload_text">Click to upload or drag &amp; drop photos</div>
+            <div class="upload-hint" data-i18n="upload_hint">JPG, PNG, WEBP — Max 5MB each — Up to 5 photos</div>
+          </div>
+          <div id="preview-container"></div>
+          <div class="upload-count" id="upload-count"></div>
+        </div>
+        <button type="submit" class="btn-submit" data-i18n="btn_submit">📤 Submit Complaint</button>
+        <div style="text-align: center; margin-top: 20px;">
+    <a href="{{ url_for('home') }}" 
+       class="back-link" 
+       data-i18n="back_home">
+       ← Back to Home
+    </a>
+</div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="cityModal">
+  <div class="modal">
+    <h3 data-i18n="select_city_title">🏙️ Select Your City</h3>
+    <select id="manual-city-select">
+      <option value="" data-i18n="select_city_placeholder">-- Select City --</option>
+      <optgroup label="Karnataka">
+        <option value="belagavi">Belagavi (Belgaum)</option>
+        <option value="mysuru">Mysuru (Mysore)</option>
+        <option value="hubballi-dharwad">Hubballi-Dharwad</option>
+        <option value="mangaluru">Mangaluru</option>
+        <option value="kalaburagi">Kalaburagi (Gulbarga)</option>
+        <option value="vijayapura">Vijayapura (Bijapur)</option>
+        <option value="shivamogga">Shivamogga</option>
+        <option value="tumakuru">Tumakuru</option>
+        <option value="davanagere">Davanagere</option>
+        <option value="ballari">Ballari</option>
+        <option value="raichur">Raichur</option>
+        <option value="bidar">Bidar</option>
+        <option value="hassan">Hassan</option>
+        <option value="udupi">Udupi</option>
+        <option value="rabakavi-banhatti">Rabakavi-Banhatti</option>
+        <option value="jamkhandi">Jamkhandi</option>
+        <option value="bagalkot">Bagalkot</option>
+        <option value="gadag">Gadag</option>
+        <option value="dharwad">Dharwad</option>
+        <option value="koppal">Koppal</option>
+      </optgroup>
+    </select>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="setManualCity()" data-i18n="btn_confirm">✓ Confirm</button>
+      <button class="btn-cancel" onclick="closeCityModal()" data-i18n="btn_cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+<script>
+let currentCity = "{{ city | default('') }}";
+let selectedFiles = [];
+initLanguageSwitcher();
+document.addEventListener('DOMContentLoaded', function() {
+  if (!currentCity) { detectLocation(); }
+  else { updateBanner(currentCity, 'session'); if (document.querySelectorAll('#ward-select option').length <= 1) loadWards(currentCity); }
+});
+function detectLocation() {
+  showLoading(true);
+  if (navigator.geolocation) navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError, { timeout: 8000 });
+  else detectByIP();
+}
+function onLocationSuccess(position) {
+  const lat = position.coords.latitude, lon = position.coords.longitude;
+  document.getElementById('lat-input').value = lat;
+  document.getElementById('lon-input').value = lon;
+  fetch('/geo/detect-city', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ latitude: lat, longitude: lon }) })
+  .then(r => r.json()).then(data => { showLoading(false); if (data.found) setCity(data.city, data.state); else detectByIP(); })
+  .catch(() => { showLoading(false); detectByIP(); });
+}
+function onLocationError() { detectByIP(); }
+function detectByIP() {
+  showLoading(true);
+  fetch('/geo/detect-city', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({}) })
+  .then(r => r.json()).then(data => { showLoading(false); if (data.found && data.city !== 'Unknown') setCity(data.city, data.state || '', 'ip'); else { updateBanner(t('detecting_location'), 'error'); openCityModal(); } })
+  .catch(() => { showLoading(false); updateBanner(t('detecting_location'), 'error'); openCityModal(); });
+}
+function setCity(cityName, state, source) {
+  currentCity = cityName; document.getElementById('city-input').value = cityName;
+  updateBanner(cityName, 'detected', state); loadWards(cityName);
+}
+function loadWards(cityName) {
+  const select = document.getElementById('ward-select'), loading = document.getElementById('ward-loading');
+  while (select.options.length > 1) select.remove(1);
+  loading.style.display = 'block'; select.disabled = true;
+  fetch(`/geo/wards/${encodeURIComponent(cityName)}`).then(r => r.json()).then(data => {
+    loading.style.display = 'none'; select.disabled = false;
+    if (data.found && data.wards && data.wards.length > 0) data.wards.forEach(ward => { const opt = document.createElement('option'); opt.value = ward.ward_id; opt.textContent = ward.ward_name; select.appendChild(opt); });
+  }).catch(() => { loading.style.display = 'none'; select.disabled = false; });
+}
+function updateBanner(cityName, status, state) {
+  const banner = document.getElementById('location-banner'), display = document.getElementById('city-display'), sub = document.getElementById('location-sub');
+  banner.className = '';
+  if (status === 'detected' || status === 'session') {
+    banner.classList.add('detected');
+    display.textContent = '📍 ' + cityName.replace(/(^\s)\S/g, c => c.toUpperCase());
+    sub.textContent = state ? `${state} · ${t('auto_detected')}` : (status === 'session' ? t('from_session') : t('auto_detected'));
+  } else if (status === 'error') { banner.classList.add('error'); display.textContent = '⚠️ ' + cityName; sub.textContent = t('please_select_manually'); }
+}
+function openCityModal() { document.getElementById('cityModal').classList.add('show'); }
+function closeCityModal() { document.getElementById('cityModal').classList.remove('show'); }
+function setManualCity() {
+  const city = document.getElementById('manual-city-select').value;
+  if (!city) { alert(t('please_select_city')); return; }
+  fetch('/geo/set-city', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ city: city }) })
+  .then(() => { closeCityModal(); setCity(city, '', 'manual'); });
+}
+function showLoading(show) { document.getElementById('loading-overlay').classList.toggle('show', show); }
+const uploadArea = document.getElementById('upload-area');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+function handleFiles(files) {
+  for (let file of files) {
+    if (selectedFiles.length >= 5) { alert(t('max_images_alert')); break; }
+    if (!file.type.startsWith('image/')) { alert(`"${file.name}" ${t('not_image_alert')}`); continue; }
+    if (file.size > 5*1024*1024) { alert(`"${file.name}" ${t('size_limit_alert')}`); continue; }
+    selectedFiles.push(file);
+  }
+  updateFileInput(); renderPreviews();
+}
+function updateFileInput() { const dt = new DataTransfer(); selectedFiles.forEach(f => dt.items.add(f)); document.getElementById('image-input').files = dt.files; }
+function renderPreviews() {
+  const container = document.getElementById('preview-container'), countEl = document.getElementById('upload-count');
+  container.innerHTML = '';
+  selectedFiles.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = e => { const item = document.createElement('div'); item.className = 'preview-item'; item.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="remove-btn" onclick="removeFile(${index})">✕</button>`; container.appendChild(item); };
+    reader.readAsDataURL(file);
+  });
+  countEl.textContent = selectedFiles.length > 0 ? `${selectedFiles.length} ${selectedFiles.length > 1 ? t('photo_selected_plural') : t('photo_selected_single')}` : '';
+}
+function removeFile(index) { selectedFiles.splice(index, 1); updateFileInput(); renderPreviews(); }
+</script>
+</body>
+</html>

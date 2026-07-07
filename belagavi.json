@@ -1,0 +1,17 @@
+[
+  {"ward_id": 1,  "ward_name": "Ward 1 - Shivaji Nagar",  "area_name": "Shivaji Nagar",  "pincode": "590001"},
+  {"ward_id": 2,  "ward_name": "Ward 2 - Gandhi Nagar",   "area_name": "Gandhi Nagar",   "pincode": "590001"},
+  {"ward_id": 3,  "ward_name": "Ward 3 - Nehru Nagar",    "area_name": "Nehru Nagar",    "pincode": "590002"},
+  {"ward_id": 4,  "ward_name": "Ward 4 - Tilakwadi",      "area_name": "Tilakwadi",      "pincode": "590006"},
+  {"ward_id": 5,  "ward_name": "Ward 5 - Dharwad Road",   "area_name": "Dharwad Road",   "pincode": "590003"},
+  {"ward_id": 6,  "ward_name": "Ward 6 - Angol",          "area_name": "Angol",          "pincode": "590006"},
+  {"ward_id": 7,  "ward_name": "Ward 7 - Hindwadi",       "area_name": "Hindwadi",       "pincode": "590011"},
+  {"ward_id": 8,  "ward_name": "Ward 8 - Bogarves",       "area_name": "Bogarves",       "pincode": "590001"},
+  {"ward_id": 9,  "ward_name": "Ward 9 - Shahpur",        "area_name": "Shahpur",        "pincode": "590003"},
+  {"ward_id": 10, "ward_name": "Ward 10 - Bharat Nagar",  "area_name": "Bharat Nagar",   "pincode": "590016"},
+  {"ward_id": 11, "ward_name": "Ward 11 - Camp",          "area_name": "Camp",           "pincode": "590001"},
+  {"ward_id": 12, "ward_name": "Ward 12 - Khade Bazar",   "area_name": "Khade Bazar",    "pincode": "590001"},
+  {"ward_id": 13, "ward_name": "Ward 13 - Ram Nagar",     "area_name": "Ram Nagar",      "pincode": "590001"},
+  {"ward_id": 14, "ward_name": "Ward 14 - Sadashiv Nagar","area_name": "Sadashiv Nagar", "pincode": "590001"},
+  {"ward_id": 15, "ward_name": "Ward 15 - Shahapur",      "area_name": "Shahapur",       "pincode": "590003"}
+]

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Central Admin Login – Swachh Bharat</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; flex-direction: column; min-height: 100vh; }
+    .lang-bar { background: #145a32; display: flex; justify-content: flex-end; align-items: center; padding: 6px 24px; gap: 6px; }
+    .lang-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.4); background: transparent; color: white; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+    .lang-btn:hover, .lang-btn.active { background: white; color: #1a6e3e; border-color: white; }
+    .center { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: white; padding: 36px; border-radius: 12px; width: 380px; box-shadow: 0 2px 16px rgba(0,0,0,0.1); }
+    .logo { text-align: center; margin-bottom: 24px; font-size: 2.5rem; }
+    h2 { color: #1a6e3e; margin-bottom: 24px; text-align: center; font-size: 1.4rem; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; color: #444; }
+    input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 16px; font-size: 1rem; }
+    input:focus { outline: none; border-color: #1a6e3e; box-shadow: 0 0 0 3px rgba(26,110,62,0.1); }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(135deg,#1a6e3e,#27ae60); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    .btn:hover { opacity: 0.9; }
+    .alert { padding: 10px 14px; background: #f8d7da; color: #721c24; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #dc3545; }
+  </style>
+</head>
+<body>
+<div class="lang-bar">
+  <span style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-right:4px;">🌐</span>
+  <button class="lang-btn" data-lang="en" onclick="applyTranslations('en')">English</button>
+  <button class="lang-btn" data-lang="hi" onclick="applyTranslations('hi')">हिंदी</button>
+  <button class="lang-btn" data-lang="kn" onclick="applyTranslations('kn')">ಕನ್ನಡ</button>
+</div>
+<div class="center">
+  <div class="card">
+    <div class="logo">🏛️</div>
+    <h2 data-i18n="central_admin_title">Central Admin</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat, msg in messages %}<div class="alert">{{ msg }}</div>{% endfor %}{% endif %}
+    {% endwith %}
+    <form method="POST">
+      <label data-i18n="login_username">Username</label>
+      <input type="text" name="username" value="admin">
+      <label data-i18n="login_password">Password</label>
+      <input type="password" name="password">
+      <button type="submit" class="btn" data-i18n="login_btn">Login</button>
+    </form>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+<script>initLanguageSwitcher();</script>
+</body>
+</html>

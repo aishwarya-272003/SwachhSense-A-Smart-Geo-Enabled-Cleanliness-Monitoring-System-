@@ -1,0 +1,118 @@
+{% extends "staff/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}📊 <span data-i18n="nav_dashboard">Dashboard</span>{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="num">{{ stats.total }}</div>
+    <div class="lbl" data-i18n="stat_total">Total Complaints</div>
+  </div>
+  <div class="stat-card" style="border-color:#ffc107;">
+    <div class="num" style="color:#856404;">{{ stats.pending }}</div>
+    <div class="lbl" data-i18n="stat_pending">Pending</div>
+  </div>
+  <div class="stat-card" style="border-color:#007bff;">
+    <div class="num" style="color:#004085;">{{ stats.in_progress }}</div>
+    <div class="lbl" data-i18n="stat_in_progress">In Progress</div>
+  </div>
+  <div class="stat-card" style="border-color:#28a745;">
+    <div class="num" style="color:#155724;">{{ stats.resolved }}</div>
+    <div class="lbl" data-i18n="stat_resolved">Resolved</div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-body" style="padding:14px 20px;display:flex;align-items:center;gap:12px;">
+    <strong>📍 <span data-i18n="filter_city">Filter by City:</span></strong>
+    <select onchange="window.location='?city='+this.value" style="width:auto;padding:6px 10px;">
+      <option value="" data-i18n="all_cities">All Cities</option>
+      {% for c in supported_cities %}
+        <option value="{{ c.lower() }}" {{ 'selected' if c.lower() == city.lower() }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <span style="color:#666;font-size:0.85rem;">{{ complaints | length }} <span data-i18n="complaints_count">complaints</span></span>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" data-i18n="recent_complaints">Recent Complaints</div>
+  <div class="card-body" style="padding:0;">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th data-i18n="th_name">Name</th><th data-i18n="th_phone">Phone</th><th data-i18n="th_city">City</th>
+          <th data-i18n="th_ward">Ward</th><th data-i18n="th_complaint">Complaint</th><th data-i18n="th_photos">Photos</th><th data-i18n="th_status">Status</th><th data-i18n="th_date">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td>{{ c.complaint_id }}</td>
+          <td>{{ c.name }}</td><td>{{ c.phone }}</td>
+          <td>{{ c.city | title }}</td><td>{{ c.ward_id }}</td>
+          <td>{{ c.complaint[:50] }}{% if c.complaint|length > 50 %}...{% endif %}</td>
+          <td>
+            {% if c.images %}
+              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                {% for img in c.images %}
+                  <a href="/static/uploads/{{ img }}" target="_blank" title="Click to open photo">
+                    <img src="/static/uploads/{{ img }}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:2px solid #c8e6c9;cursor:pointer;">
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}<span style="color:#ccc;font-size:0.82rem;">None</span>{% endif %}
+          </td>
+          <td><span class="badge badge-{{ 'resolved' if c.status == 'Resolved' else ('progress' if c.status == 'In Progress' else 'pending') }}">{{ c.status }}</span></td>
+          <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" style="text-align:center;color:#999;padding:24px;" data-i18n="no_complaints">No complaints found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- Grid Modal -->
+<div id="imageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <button onclick="closeImages()" style="position:absolute;top:20px;right:24px;background:white;border:none;border-radius:50%;width:38px;height:38px;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);">✕</button>
+  <p id="imageCount" style="color:rgba(255,255,255,0.7);font-size:0.85rem;margin:0;"></p>
+  <div id="imageGrid" style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;max-width:980px;padding:16px 24px;max-height:82vh;overflow-y:auto;"></div>
+  <p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin:0;">Click any image to enlarge &nbsp;|&nbsp; Press Esc to close</p>
+</div>
+<!-- Single-image Zoom Modal -->
+<div id="zoomModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:10001;align-items:center;justify-content:center;">
+  <button onclick="closeZoom()" style="position:absolute;top:20px;right:24px;background:white;border:none;border-radius:50%;width:38px;height:38px;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);">✕</button>
+  <img id="zoomImg" src="" style="max-width:92vw;max-height:92vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function showImages(images) {
+  const modal = document.getElementById('imageModal');
+  const grid  = document.getElementById('imageGrid');
+  const count = document.getElementById('imageCount');
+  grid.innerHTML = '';
+  count.textContent = images.length + ' photo' + (images.length > 1 ? 's' : '');
+  images.forEach((filename, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:relative;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.4);cursor:zoom-in;';
+    const img = document.createElement('img');
+    img.src = '/static/uploads/' + filename;
+    img.style.cssText = 'display:block;max-width:280px;max-height:280px;width:auto;height:auto;border-radius:10px;';
+    img.title = 'Click to enlarge';
+    img.onclick = () => window.open(img.src, '_blank');
+    img.onerror = () => { wrapper.innerHTML = '<div style="width:180px;height:140px;background:#333;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#888;font-size:0.85rem;">Not found</div>'; };
+    const badge = document.createElement('div');
+    badge.textContent = (index + 1) + ' / ' + images.length;
+    badge.style.cssText = 'position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:white;font-size:0.72rem;padding:2px 8px;border-radius:10px;pointer-events:none;';
+    wrapper.appendChild(img); wrapper.appendChild(badge); grid.appendChild(wrapper);
+  });
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeImages() { document.getElementById('imageModal').style.display = 'none'; document.body.style.overflow = ''; }
+function openZoom(src) { document.getElementById('zoomImg').src = src; document.getElementById('zoomModal').style.display = 'flex'; }
+function closeZoom() { document.getElementById('zoomModal').style.display = 'none'; }
+document.getElementById('imageModal').addEventListener('click', function(e) { if (e.target === this) closeImages(); });
+document.getElementById('zoomModal').addEventListener('click', function(e) { if (e.target === this) closeZoom(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeZoom(); closeImages(); } });
+</script>
+{% endblock %}

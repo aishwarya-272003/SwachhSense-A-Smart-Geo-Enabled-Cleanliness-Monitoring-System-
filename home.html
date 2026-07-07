@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Swachh Bharat Mission</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;}
+
+    /* ── lang bar ── */
+    .lang-bar{background:#145a32;display:flex;justify-content:flex-end;align-items:center;padding:6px 24px;gap:6px;}
+    .lang-btn{padding:4px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.4);background:transparent;color:white;cursor:pointer;font-size:.8rem;transition:all .2s;}
+    .lang-btn:hover,.lang-btn.active{background:white;color:#1a6e3e;border-color:white;}
+
+    /* ── hero ── */
+    .hero{background:linear-gradient(135deg,#1a6e3e 0%,#27ae60 100%);color:white;padding:60px 24px;text-align:center;}
+    .hero h1{font-size:2.2rem;margin-bottom:12px;}
+    .hero p{font-size:1.1rem;opacity:.85;max-width:500px;margin:0 auto 32px;}
+    .btn-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+    .btn{padding:13px 26px;border-radius:8px;font-size:.97rem;font-weight:700;text-decoration:none;cursor:pointer;border:none;display:inline-block;transition:transform .15s,opacity .15s;}
+    .btn:hover{transform:translateY(-2px);opacity:.93;}
+    .btn-primary{background:white;color:#1a6e3e;}
+    .btn-outline{background:transparent;color:white;border:2px solid white;}
+
+    /* ── feature cards ── */
+    .features{max-width:1000px;margin:48px auto;padding:0 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px;}
+    .feature-card{background:white;border-radius:14px;padding:28px 22px;box-shadow:0 2px 10px rgba(0,0,0,.08);text-align:center;transition:transform .2s,box-shadow .2s;}
+    .feature-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.11);}
+    .feature-icon{font-size:2.4rem;margin-bottom:12px;}
+    .feature-card h3{color:#1a6e3e;margin-bottom:8px;font-size:1.02rem;}
+    .feature-card p{color:#666;font-size:.88rem;line-height:1.55;}
+
+    /* ── track card (clickable) ── */
+    .track-card{background:linear-gradient(135deg,#1a6e3e,#27ae60);color:white;cursor:pointer;border:none;width:100%;}
+    .track-card h3{color:white;}
+    .track-card p{color:rgba(255,255,255,.85);}
+    .track-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,110,62,.35);}
+
+    /* ── modal overlay ── */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;align-items:center;justify-content:center;padding:16px;}
+    .overlay.open{display:flex;}
+    .modal{background:white;border-radius:18px;padding:36px 32px;width:100%;max-width:440px;position:relative;box-shadow:0 12px 48px rgba(0,0,0,.22);animation:pop .18s ease;}
+    @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.35rem;cursor:pointer;color:#aaa;line-height:1;}
+    .modal-close:hover{color:#333;}
+    .modal-icon{font-size:2.2rem;text-align:center;margin-bottom:10px;}
+    .modal h2{color:#1a6e3e;font-size:1.25rem;text-align:center;margin-bottom:6px;}
+    .modal .sub{color:#777;font-size:.87rem;text-align:center;margin-bottom:22px;}
+    .modal label{display:block;font-size:.82rem;font-weight:700;color:#555;margin-bottom:5px;}
+    .modal input{width:100%;padding:10px 13px;border:1.5px solid #ddd;border-radius:8px;font-size:.97rem;margin-bottom:14px;transition:border-color .2s;}
+    .modal input:focus{outline:none;border-color:#1a6e3e;box-shadow:0 0 0 3px rgba(26,110,62,.1);}
+    .btn-check{width:100%;padding:12px;background:linear-gradient(135deg,#1a6e3e,#27ae60);color:white;border:none;border-radius:9px;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .btn-check:hover{opacity:.9;}
+
+    /* ── result box ── */
+    .result{margin-top:18px;border-radius:11px;padding:16px;display:none;}
+    .result.ok{background:#f0fff4;border:1px solid #a7d7c5;}
+    .result.fail{background:#fffbea;border:1px solid #f0c040;}
+    .result.err{background:#fff0f0;border:1px solid #f5a0a0;}
+    .rrow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:.88rem;}
+    .rrow:last-child{border:none;}
+    .rl{color:#888;}
+    .rv{font-weight:700;color:#222;text-align:right;}
+    .badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:700;}
+    .b-pending{background:#fef3c7;color:#92400e;}
+    .b-progress{background:#dbeafe;color:#1e40af;}
+    .b-resolved{background:#dcfce7;color:#166534;}
+    .spin{display:none;text-align:center;padding:14px 0;color:#1a6e3e;font-size:.9rem;}
+
+    /* ── resolved proof image panel ── */
+    .proof-wrap{margin-top:14px;display:none;}
+    .proof-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+                 color:#166534;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+    .proof-img{width:100%;border-radius:10px;border:2px solid #bbf7d0;
+               box-shadow:0 3px 14px rgba(0,0,0,.13);display:block;}
+    .proof-none{font-size:.82rem;color:#6b7280;background:#f9fafb;
+                border:1px dashed #d1d5db;border-radius:8px;padding:10px 14px;text-align:center;}
+  </style>
+</head>
+<body>
+
+<!-- lang bar -->
+<div class="lang-bar">
+  <span style="color:rgba(255,255,255,.7);font-size:.78rem;margin-right:4px;">🌐</span>
+  <button class="lang-btn" data-lang="en" onclick="applyTranslations('en')">English</button>
+  <button class="lang-btn" data-lang="hi" onclick="applyTranslations('hi')">हिंदी</button>
+  <button class="lang-btn" data-lang="kn" onclick="applyTranslations('kn')">ಕನ್ನಡ</button>
+</div>
+
+<!-- hero -->
+<div class="hero">
+  <div style="font-size:3rem;margin-bottom:12px;">🌿</div>
+  <h1 data-i18n="site_name">Swachh Bharat Mission</h1>
+  <p data-i18n="hero_subtitle">Report sanitation issues in your city. We'll make sure they get resolved.</p>
+  <div class="btn-row">
+    <a href="{{ url_for('user.user_form') }}" class="btn btn-primary" data-i18n="btn_register">📝 Register Complaint</a>
+    <a href="{{ url_for('staff.login') }}"    class="btn btn-outline"  data-i18n="btn_staff">🔐 Staff Login</a>
+    <a href="{{ url_for('worker.login') }}"   class="btn btn-outline"  data-i18n="btn_worker">👷 Worker Login</a>
+  </div>
+</div>
+
+<!-- feature cards (4th = track card) -->
+<div class="features">
+  <div class="feature-card">
+    <div class="feature-icon">📍</div>
+    <h3 data-i18n="feat_location_title">Auto Location Detection</h3>
+    <p data-i18n="feat_location_desc">Automatically detects your city and loads ward information. No manual setup needed.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🏙️</div>
+    <h3 data-i18n="feat_everywhere_title">Works Everywhere</h3>
+    <p data-i18n="feat_everywhere_desc">Supports Belagavi, Mysuru, Mangaluru, and all Karnataka cities. Expandable to all of India.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">⚡</div>
+    <h3 data-i18n="feat_fast_title">Fast Resolution</h3>
+    <p data-i18n="feat_fast_desc">Complaints are assigned to local ward workers for quick resolution and tracking.</p>
+  </div>
+
+  <!-- ▼ TRACK COMPLAINT CARD ▼ -->
+  <button class="feature-card track-card" onclick="openModal()" aria-label="Track complaint status">
+    <div class="feature-icon">🔍</div>
+    <h3>Track Your Complaint</h3>
+    <p>Enter your Complaint ID &amp; phone number to see real-time status updates instantly.</p>
+    <div style="margin-top:16px;display:inline-block;background:rgba(255,255,255,.22);color:white;padding:7px 20px;border-radius:20px;font-size:.83rem;font-weight:700;">
+      Check Status →
+    </div>
+  </button>
+</div>
+
+<!-- ── TRACK STATUS MODAL ── -->
+<div class="overlay" id="overlay" onclick="bgClose(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    <div class="modal-icon">🔍</div>
+    <h2 id="modalTitle">Check Complaint Status</h2>
+    <p class="sub">Enter your Complaint ID and the phone number you registered with.</p>
+
+    <label for="inId">Complaint ID</label>
+    <input id="inId"    type="number" placeholder="e.g. 1042" min="1">
+
+    <label for="inPhone">Registered Phone Number</label>
+    <input id="inPhone" type="tel"    placeholder="e.g. 9876543210" maxlength="10">
+
+    <button class="btn-check" onclick="checkStatus()">Check Status</button>
+
+    <div class="spin"   id="spin">⏳ Looking up your complaint…</div>
+    <div class="result" id="result">
+      <div class="rrow"><span class="rl">Complaint ID</span> <span class="rv" id="rId">–</span></div>
+      <div class="rrow"><span class="rl">Name</span>         <span class="rv" id="rName">–</span></div>
+      <div class="rrow"><span class="rl">Ward</span>         <span class="rv" id="rWard">–</span></div>
+      <div class="rrow"><span class="rl">City</span>         <span class="rv" id="rCity">–</span></div>
+      <div class="rrow"><span class="rl">Submitted</span>    <span class="rv" id="rDate">–</span></div>
+      <div class="rrow"><span class="rl">Status</span>       <span class="rv" id="rStatus">–</span></div>
+      <div class="rrow" id="rResolvedRow" style="display:none;">
+        <span class="rl">Resolved On</span><span class="rv" id="rResolved">–</span>
+      </div>
+
+      <!-- proof image shown when status = Resolved -->
+      <div class="proof-wrap" id="proofWrap">
+        <div class="proof-label">📷 Proof of Resolution</div>
+        <img id="proofImg" class="proof-img" src="" alt="Proof of resolution photo">
+        <div class="proof-none" id="proofNone" style="display:none;">
+          No proof photo was uploaded for this complaint.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+<script>
+initLanguageSwitcher();
+
+function openModal(){
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('inId').focus();
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('inId').value='';
+  document.getElementById('inPhone').value='';
+  var r=document.getElementById('result');
+  r.style.display='none'; r.className='result';
+  document.getElementById('spin').style.display='none';
+  /* reset proof panel */
+  document.getElementById('proofWrap').style.display='none';
+  document.getElementById('proofImg').src='';
+  document.getElementById('proofNone').style.display='none';
+}
+function bgClose(e){ if(e.target===document.getElementById('overlay')) closeModal(); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
+['inId','inPhone'].forEach(function(id){
+  document.getElementById(id).addEventListener('keydown',function(e){ if(e.key==='Enter') checkStatus(); });
+});
+
+async function checkStatus(){
+  var cid=document.getElementById('inId').value.trim();
+  var ph =document.getElementById('inPhone').value.trim();
+  if(!cid||!ph){alert('Please fill in both fields.');return;}
+  var spin=document.getElementById('spin');
+  var box =document.getElementById('result');
+  box.style.display='none'; spin.style.display='block';
+  try{
+    var r=await fetch('/user/check-status?complaint_id='+encodeURIComponent(cid)+'&phone='+encodeURIComponent(ph));
+    var d=await r.json();
+    spin.style.display='none';
+    if(d.found){
+      var c=d.complaint;
+      document.getElementById('rId').textContent   ='#'+c.complaint_id;
+      document.getElementById('rName').textContent =c.name;
+      document.getElementById('rWard').textContent =c.ward_name||c.ward_id||'–';
+      document.getElementById('rCity').textContent =c.city?(c.city[0].toUpperCase()+c.city.slice(1)):'–';
+      document.getElementById('rDate').textContent =c.created_at||'–';
+      var bc='b-pending';
+      if(c.status==='In Progress') bc='b-progress';
+      if(c.status==='Resolved')    bc='b-resolved';
+      document.getElementById('rStatus').innerHTML='<span class="badge '+bc+'">'+c.status+'</span>';
+      if(c.status==='Resolved'&&c.resolved_at){
+        document.getElementById('rResolved').textContent=c.resolved_at;
+        document.getElementById('rResolvedRow').style.display='flex';
+      } else { document.getElementById('rResolvedRow').style.display='none'; }
+
+      /* ── proof image ── */
+      var pw   = document.getElementById('proofWrap');
+      var pi   = document.getElementById('proofImg');
+      var pn   = document.getElementById('proofNone');
+      if(c.status==='Resolved'){
+        pw.style.display = 'block';
+        if(c.proof_image){
+          pi.src          = '/static/uploads/' + c.proof_image;
+          pi.style.display= 'block';
+          pn.style.display= 'none';
+        } else {
+          pi.style.display= 'none';
+          pn.style.display= 'block';
+        }
+      } else {
+        pw.style.display = 'none';
+      }
+
+      box.className='result ok';
+    } else {
+      box.innerHTML='<p style="color:#92400e;font-weight:600;font-size:.9rem;">⚠️ '+(d.message||'No complaint found. Check your ID and phone number.')+'</p>';
+      box.className='result fail';
+    }
+    box.style.display='block';
+  }catch(err){
+    spin.style.display='none';
+    document.getElementById('result').innerHTML='<p style="color:#c62828;font-size:.9rem;">❌ Connection error. Please try again.</p>';
+    document.getElementById('result').className='result err';
+    document.getElementById('result').style.display='block';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+[
+  {"ward_id": 1,  "ward_name": "Ward 1 - Devaraja",       "area_name": "Devaraja",       "pincode": "570001"},
+  {"ward_id": 2,  "ward_name": "Ward 2 - Krishnaraj",     "area_name": "Krishnaraj",     "pincode": "570001"},
+  {"ward_id": 3,  "ward_name": "Ward 3 - Chamaraja",      "area_name": "Chamaraja",      "pincode": "570004"},
+  {"ward_id": 4,  "ward_name": "Ward 4 - Narasimharaja",  "area_name": "Narasimharaja",  "pincode": "570005"},
+  {"ward_id": 5,  "ward_name": "Ward 5 - Hebbal",         "area_name": "Hebbal",         "pincode": "570017"},
+  {"ward_id": 6,  "ward_name": "Ward 6 - Kuvempunagar",   "area_name": "Kuvempunagar",   "pincode": "570023"},
+  {"ward_id": 7,  "ward_name": "Ward 7 - Lakshmipuram",   "area_name": "Lakshmipuram",   "pincode": "570004"},
+  {"ward_id": 8,  "ward_name": "Ward 8 - Vidyaranyapuram","area_name": "Vidyaranyapuram","pincode": "570008"},
+  {"ward_id": 9,  "ward_name": "Ward 9 - Saraswathipuram","area_name": "Saraswathipuram","pincode": "570009"},
+  {"ward_id": 10, "ward_name": "Ward 10 - Jayalakshmipuram","area_name":"Jayalakshmipuram","pincode":"570012"}
+]

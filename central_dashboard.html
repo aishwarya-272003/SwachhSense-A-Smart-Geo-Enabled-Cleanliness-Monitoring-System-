@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Central Dashboard – Swachh Bharat</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; }
+    .lang-bar { background: #145a32; display: flex; justify-content: flex-end; align-items: center; padding: 6px 24px; gap: 6px; }
+    .lang-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.4); background: transparent; color: white; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+    .lang-btn:hover, .lang-btn.active { background: white; color: #1a6e3e; border-color: white; }
+    .topbar { background: linear-gradient(135deg,#1a6e3e,#27ae60); color: white; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .topbar h1 { font-size: 1.3rem; }
+    .btn-logout { padding: 7px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+    .btn-logout:hover { background: rgba(255,255,255,0.3); }
+    .container { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: 16px; }
+    .cities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .city-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-top: 3px solid #1a6e3e; transition: transform 0.2s, box-shadow 0.2s; }
+    .city-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .city-card h3 { color: #1a6e3e; font-size: 1rem; margin-bottom: 8px; }
+    .city-card a { color: #007bff; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
+    .city-card a:hover { text-decoration: underline; }
+    .empty-msg { color: #999; text-align: center; padding: 48px; background: white; border-radius: 10px; }
+  </style>
+</head>
+<body>
+<div class="lang-bar">
+  <span style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-right:4px;">🌐</span>
+  <button class="lang-btn" data-lang="en" onclick="applyTranslations('en')">English</button>
+  <button class="lang-btn" data-lang="hi" onclick="applyTranslations('hi')">हिंदी</button>
+  <button class="lang-btn" data-lang="kn" onclick="applyTranslations('kn')">ಕನ್ನಡ</button>
+</div>
+<div class="topbar">
+  <h1>🏛️ <span data-i18n="central_dashboard_title">Central Dashboard – All Cities</span></h1>
+  <a href="{{ url_for('central.logout') }}" class="btn-logout" data-i18n="logout">Logout</a>
+</div>
+<div class="container">
+  <p class="section-title" data-i18n="supported_cities_label">Supported Cities ({{ cities | length }})</p>
+  <div class="cities-grid">
+    {% for city in cities %}
+    <div class="city-card">
+      <h3>🏙️ {{ city }}</h3>
+      <a href="/staff/dashboard?city={{ city }}" data-i18n="view_complaints">View Complaints →</a>
+    </div>
+    {% else %}
+    <div class="empty-msg" data-i18n="no_cities">No cities configured yet.</div>
+    {% endfor %}
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+<script>initLanguageSwitcher();</script>
+</body>
+</html>
